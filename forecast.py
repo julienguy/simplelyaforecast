@@ -8,10 +8,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 from astropy.table import Table
 
-def e(z,omegam=0.3) :
+def e(z,omegam) :
     return np.sqrt(omegam*(1+z)**3+(1-omegam))
 
-def r(z,omegam=0.3) :
+def r(z,omegam) :
     assert(np.isscalar(z))
     H0=100 # km/s/Mpc
     cspeed=3e5 # km/s
@@ -98,7 +98,8 @@ def main() :
     camb_table,camb_header=fitsio.read(args.pk_filename,header=True)
     print("P(k) header:")
     print(camb_header)
-
+    omegam = camb_header["OM"]
+    print("use omegam=",omegam)
 
     # read SNR
     if not os.path.isfile(args.snr_filename) :
@@ -123,7 +124,7 @@ def main() :
     snr  = tt['SNR'].clip(1e-5,1e5)
 
     # the noise power as a function of S/N:
-    PN = PNoise(snr,zqso)
+    PN = PNoise(snr,zqso,omegam=omegam)
 
     #  n(z) for Lya QSO
     zbins=np.array([float(z) for z in args.zbins.split(",")])
@@ -147,8 +148,8 @@ def main() :
     print("ntot= {:.2f}/deg2".format(ntot))
 
     # densities in redshift slice
-    rr=np.array([r(z) for z in zbins])
-    rr_edges=np.array([r(z) for z in zedges])
+    rr=np.array([r(z,omegam=omegam) for z in zbins])
+    rr_edges=np.array([r(z,omegam=omegam) for z in zedges])
     drr=(rr_edges[1:]-rr_edges[:-1])
     dn = dndz*dz*(180/np.pi)**2/rr**2/drr # (Mpc/h)^-3
 
@@ -165,7 +166,7 @@ def main() :
 
     # cosmological signal at fiducial k
     klos = 0.15 # A fiducial k-value for the QSO value, in h/Mpc.
-    Plos = Plos_PD13(klos,zqso)
+    Plos = Plos_PD13(klos,zqso,omegam=omegam)
 
     # compute mean weight of quasar, nu, per redshift bin
     nu = np.zeros(zbins.size)
@@ -187,8 +188,8 @@ def main() :
     zmin=args.observer_frame_min_wavelength/lambda_lya-1
     z1[z1<zmin]=zmin
     z2[z2<zmin]=zmin
-    r2=np.array([r(z) for z in z2])
-    r1=np.array([r(z) for z in z1])
+    r2=np.array([r(z,omegam=omegam) for z in z2])
+    r1=np.array([r(z,omegam=omegam) for z in z1])
     length=r2-r1
     forecast_table["forest_length_Mpch"]=length # (Mpc/h)
 
