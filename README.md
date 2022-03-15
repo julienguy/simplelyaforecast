@@ -8,7 +8,7 @@ Only the Lya auto-correlation is implemented for now.
 
 ```
 
-./forecast.py --snr-filename lya-snr-fuji-sv3.fits --pk-filename PlanckDR16.fits -o forecast.csv
+./forecast.py --snr-filename lya-snr-fuji-sv3.fits --pk-filename PlanckDR16.fits -o forecast-fuji.csv
 
 Use omegam= 0.314569514863487
 Do not include non qso targets in SNR
@@ -27,5 +27,14 @@ ntot= 66.39/deg2
 3.55 0.08191806395537313 0.10434670521060206 -0.4450852264311003
 sigma_log_dh_tot =  0.01152198656616991
 sigma_log_da_tot =  0.012258470437353444
+```
 
+The result depend on the snr (or g-band magnitude) of QSO in the sample,
+so it's different for the Guadalupe data set.
+
+```
+./forecast.py --snr-filename lya-snr-guadalupe.fits --pk-filename PlanckDR16.fits -o forecast-guadalupe.csv
+
+sigma_log_dh_tot =  0.012156286570903056
+sigma_log_da_tot =  0.013077418768388797
 ```
