@@ -81,6 +81,7 @@ def main() :
     parser.add_argument("--with-non-qso-targets",action="store_true")
     parser.add_argument("-o","--outfile",type=str,default=None,help="output table with forecast results")
     parser.add_argument("--scale-dndz",type=float,default=1.,help="apply a scale factor to dndz")
+    parser.add_argument("--scale-snr2",type=float,default=1.,help="apply a scale factor to the snr^2 (equivalent to a scale in exposure time)")
     parser.add_argument("--rest-frame-min-wavelength",type=float,default=1040.,help="min wavelength of forest (rest-frame)")
     parser.add_argument("--rest-frame-max-wavelength",type=float,default=1200.,help="max wavelength of forest (rest-frame)")
     parser.add_argument("--observer-frame-min-wavelength",type=float,default=3600.,help="observer frame min wavelength")
@@ -122,6 +123,13 @@ def main() :
 
     zqso = tt['Z'].clip(1e-5,1e5)
     snr  = tt['SNR'].clip(1e-5,1e5)
+
+    if args.scale_snr2 != 1 :
+        if args.scale_snr2 <=0 :
+            print("scale-snr2 has to be positive, and it is",args.scale_snr2)
+            sys.exit(2)
+        print("Applying a scale factor to S/N^2 =",args.scale_snr2)
+        snr *= np.sqrt(args.scale_snr2)
 
     # the noise power as a function of S/N:
     PN = PNoise(snr,zqso,omegam=omegam)
